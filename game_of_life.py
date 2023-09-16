@@ -5,8 +5,8 @@ import numpy as np
 # Create a 3x4 array filled with zeros
 a = random.randint(0,3)
 
-my_array = np.zeros((3, 4)) #3 is lentgh y and 4 lenth x
-my_arra = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+# my_array = np.zeros((3, 4)) #3 is lentgh y and 4 lenth x
+# my_arra = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 #print(my_arra[0,1]) this prints number 2
 
 # my_arra = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
@@ -20,54 +20,93 @@ my_arra = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
 #     for element in row:
 #         print(element)
 
-
-def create_start_pos(x_len, y_len,num_alive):
-    start_pos = []
-    for i in range(num_alive):
-        x = random.randint(0,x_len-1)
-        y = random.randint(0,y_len-1)
-        start_pos.append((x,y))
-    return start_pos #still need to make sure not same value twice
-
-
-def create_starting_map(x_len,y_len, num_alive): #start_pos is a list with all pos of num_alive
+def create_starting_map(x_len,y_len, num_alive): 
     mapp = np.zeros((y_len, x_len))
-    start_pos = []
+    placed_ones = 0
+    pos_alive = []
 
-    for i in range(num_alive):
+    if x_len * y_len < num_alive:
+        num_alive = x_len*y_len
+
+    while placed_ones < num_alive:
         x = random.randint(0,x_len-1)
         y = random.randint(0,y_len-1)
-        start_pos.append((x,y))
 
-    for i in range(num_alive):
-        #mapp[start_pos[i][0], start_pos[i][1]] = 1
-        x = random.randint(0,x_len-1)
-        y = random.randint(0,y_len-1)
-        mapp[x,y] = 1
-        print(x,y)
-    return mapp
+        if mapp[y,x] == 0:
+            mapp[y,x] = 1
+            placed_ones += 1   
+            pos_alive.append([y,x])
 
+    return mapp, pos_alive
+
+mappe, position = create_starting_map(7,9, 40)
+print(mappe, position)
+
+def live_die(mapp, alive_pos):
+    y = mapp.shape[0] #gives lenght y
+    x = mapp.shape[1] #gives lengh x
+    print(mapp, alive_pos)
+    next_mapp = mapp
+    still_alive = []
+
+    for element in alive_pos:
+        alive_neighbours = 0
+        element_top_corner = [element[0]-1, element[1]-1]
         
 
+        for e in range(3):
+            for i in range(3):
+                if element_top_corner in alive_pos and element_top_corner != element:
+                    alive_neighbours += 1
+                    #print("yay")
+                element_top_corner[1] += 1
+            element_top_corner[0] += 1
+            element_top_corner[1] -= (x-1)
 
-# s = create_start_pos(4,4,7)
+        print(alive_neighbours,element)
+
+        if alive_neighbours < 2:
+            next_mapp[element[0],element[1]] = 0
+
+            print("die")
+
+        if alive_neighbours == 3 or alive_neighbours == 2:
+            still_alive.append(element)
+            print("stay alive")
+
+        if alive_neighbours > 3:
+            next_mapp[element[0],element[1]] = 0
+            print("die")
+
+    print(next_mapp, still_alive)
+
+live_die(mappe, position)
 
 
-mapps = create_starting_map(4, 4, 7)
-
-
-print(mapps)
 
 
 
+# list = [[2, 3], [1, 3], [0, 3], [2, 1], [3, 1]]         
 
+# for element in list:
+#     alive_neighbours = 0
+#     element_top_corner = [element[0]-1, element[1]-1]
+#     for e in range(3):
+#         for i in range(3):
+#             if element_top_corner in list:
+#                 alive_neighbours += 1
+#                 print("yay")
+#             element_top_corner[1] += 1
+#         element_top_corner[0] += 1
+#         element_top_corner[1] -= 3
 
+#     if alive_neighbours < 2:
+#         print("die")
 
+#     elif alive_neighbours == 3:
+#         print("stay alive")
+#     elif alive_neighbours > 3:
+#         print("die")
 
-
-
-
-
-
-
+            
 
