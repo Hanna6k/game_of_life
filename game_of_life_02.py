@@ -12,6 +12,8 @@ class World:
         self.visual_x_size = visual_x_size
         self.visual_y_size = visual_y_size
 
+        self_all_dead_neighbours = []
+
         # Create cell instances and add them to the world
 
     def create_starting_cells(self):
@@ -28,6 +30,8 @@ class World:
         return pos
 
     def count_neighbours(self):
+        self.all_dead_neighbours = []
+
         for cell in self.alive_cells:
             pos_neigh = []
             pos_corner = [cell.x-1, cell.y-1]
@@ -43,13 +47,19 @@ class World:
             # print(pos_neigh)
 
             num_neighbours = 0
+            dead_neighbours = pos_neigh
             for possible_neig in self.alive_cells:
                 #num_neighbours = 0
                 if [possible_neig.x, possible_neig.y] in pos_neigh:
+                    dead_neighbours.remove([possible_neig.x, possible_neig.y])
                     #cell.num_alive_neighbours += 1
                     num_neighbours += 1
 
                 cell.num_alive_neighbours = num_neighbours
+            self.all_dead_neighbours.extend(dead_neighbours)
+            # for value in dead_neighbours:
+            #     dead_cell = Cell(value[0], value[1], True, True)
+            #     self.dead_neighbours.append(dead_cell)
             # print(cell.num_alive_neighbours)
 
     def die_over_under_pop(self):
@@ -70,10 +80,25 @@ class World:
 
         print("num_alive after:", len(self.alive_cells))
 
+    def birth_new_cells(self):
+        all_new_cells = []
+        while len(self.all_dead_neighbours) > 3:
+            realiven_cell = self.all_dead_neighbours[0]
+            count = self.all_dead_neighbours.count(realiven_cell)
+            if count == 3:
+                new_cell = Cell(realiven_cell[0], realiven_cell[1], True, True)
+                all_new_cells.append(new_cell)
+            while realiven_cell in self.all_dead_neighbours:
+                self.all_dead_neighbours.remove(realiven_cell)
+        return all_new_cells
+
+
     def update(self):
         
         self.count_neighbours()
+        new_cells = self.birth_new_cells()
         self.die_over_under_pop()
+        self.alive_cells.extend(new_cells)
 
         positions_cell = []
         for cell in self.alive_cells:
@@ -95,8 +120,8 @@ class Cell:
 
 # Create a World instance and call the update method
 
-x_visual_size = 2
-y_visual_size = 2
+x_visual_size = 4
+y_visual_size = 3
 
 number_of_generations = 4
 
@@ -122,7 +147,10 @@ for i in range(number_of_generations):
     print("second cells", position_of_next_generation)
     mapp = mapp_copy_only_zeros.copy()
     for coor in position_of_next_generation:
-        mapp[coor[1],coor[0]] = "x"
+        try:
+            mapp[coor[1],coor[0]] = "x"
+        except:
+            pass
     print(mapp)
 
 # mapp = np.empty((y_visual_size + 1, x_visual_size + 1), dtype=str)
