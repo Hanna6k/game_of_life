@@ -1,5 +1,6 @@
 import random
 import numpy as np
+import time
 
 class World:
     def __init__(self, start_num_alive, visual_x_size, visual_y_size):
@@ -10,16 +11,22 @@ class World:
         self.visual_y_size = visual_y_size
         self.all_dead_neighbours = []
 
-    def create_starting_cells(self):        
-        pos = []
-        while len(self.alive_cells) < self.start_num_alive: #creates exactly number of start_num_alive, all different
-            x = random.randint(0, self.visual_x_size)
-            y = random.randint(0, self.visual_y_size)
-            if [x,y] not in pos:
-                cell = Cell(x, y)
-                self.alive_cells.append(cell)
-                pos.append([x,y])                
-        return pos # list is used to create first np.array
+    def create_starting_cells(self, starting_pos):   
+        if len(starting_pos) == 0:     
+            pos = []
+            while len(self.alive_cells) < self.start_num_alive: #creates exactly number of start_num_alive, all different
+                x = random.randint(0, self.visual_x_size)
+                y = random.randint(0, self.visual_y_size)
+                if [x,y] not in pos:
+                    cell = Cell(x, y)
+                    self.alive_cells.append(cell)
+                    pos.append([x,y])                
+            return pos # list is used to create first np.array
+        else:
+            for elemnt in starting_pos:
+                celll = Cell(elemnt[0], elemnt[1])
+                self.alive_cells.append(celll)
+            return starting_pos
 
     def count_neighbours(self):
         self.all_dead_neighbours = [] #is used to check if dead cells turn alive
@@ -63,6 +70,8 @@ class World:
                 all_new_cells.append(new_cell)
             while realiven_cell in self.all_dead_neighbours: # this removes the dead cells that have been checked from the self.all_dead_neighbours list
                 self.all_dead_neighbours.remove(realiven_cell)
+
+        self.all_dead_neighbours = []
         return all_new_cells # can't be directly appended to self.alive_cells otherwise they could already die before being displayed
 
     def update(self):        
@@ -83,28 +92,34 @@ class Cell:
         self.num_alive_neighbours = 0
 
 # visualisation part
+X_VISUAL_SIZE = 9
+Y_VISUAL_SIZE = 9
+NUMBER_OF_GENERATIONS = 8
+TIME_FOR_NEW_GEN = 3
 
-x_visual_size = 4
-y_visual_size = 3
-number_of_generations = 4
+starting_poitions = [[-1,-1], [0,-1], [-1,0]]
+nice_pattern = [[5,5],[6,5],[7,5], [5,6],[5,7],[7,6], [7,7], [5,9], [5,10], [5,11], [6,11], [7,11],[7,10], [7,9], [7,8]]
+glider = [[1,0], [2,0], [0,1], [1,1],[1,2]]
+switcher = [[4,0], [4,1],[4,2], [4,6],[4,7], [4,8], [0,4], [1,4], [2,4], [6,4], [7,4], [8,4]]
+star = [[4,3], [4,4], [4,5], [3,4], [5,4]]
 
-world = World(start_num_alive=6, visual_x_size=x_visual_size, visual_y_size=y_visual_size)
-position_of_first_cells = world.create_starting_cells()
+world = World(start_num_alive=6, visual_x_size=X_VISUAL_SIZE, visual_y_size=Y_VISUAL_SIZE)
+position_of_first_cells = world.create_starting_cells(glider)
 
-mapp = np.empty((y_visual_size + 1, x_visual_size + 1), dtype=str) 
+mapp = np.empty((Y_VISUAL_SIZE + 1, X_VISUAL_SIZE + 1), dtype=str) 
 mapp[:] = '0'
 mapp_copy_only_zeros = mapp.copy()
 for coords in position_of_first_cells: #array of the first values before any cells are checked
-    mapp[coords[1],coords[0]] = "x"    
+    if 0 <= coords[0] < X_VISUAL_SIZE and 0 <= coords[1] < Y_VISUAL_SIZE:
+        mapp[coords[1], coords[0]] = "x"  
 print(f"generation 1:\n{mapp} \n")
 
-for i in range(number_of_generations):
+for i in range(NUMBER_OF_GENERATIONS):
+    time.sleep(TIME_FOR_NEW_GEN)
     position_of_next_generation = world.update()
     mapp = mapp_copy_only_zeros.copy()
     for coordinate in position_of_next_generation:
-        try: # since the value can be out of the array boundary
-            mapp[coordinate[1],coordinate[0]] = "x"
-        except:
-            pass
+        if 0 <= coordinate[0] <= X_VISUAL_SIZE and 0 <= coordinate[1] <= Y_VISUAL_SIZE:
+            mapp[coordinate[1], coordinate[0]] = "x"  
     print(f"generation {i + 2}:\n{mapp}\n")
 
