@@ -2,6 +2,10 @@ import random
 import numpy as np
 import time
 import pygame
+# pygame.init()
+pygame.font.init()
+
+
 
 
 class World:
@@ -93,20 +97,34 @@ class Cell:
         self.num_alive_neighbours = 0
 
 class View:
-    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size):
+    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size, blue, black, gray, green, red):
         self.world = world
         self.x_lenght = visual_x_size
         self.y_length = visual_y_size
-        self.blue = (0,0,255)
-        self.gray = (200,200,200)
-        self.green =(0,168,0)
-        self.red = (168,0,0)
+        self.blue = blue
+        self.gray = gray
+        self.green = green
+        self.red = red
+        self.black = black
         self.size_cell = cell_size
         self.menu_size = menu_size
         self.screen = pygame.display.set_mode((self.x_lenght, self.y_length +self.menu_size))
         self.run = True
         self.time_delay = 80
         self.size_enter = 30
+        pygame.font.init()
+        print( pygame.font.get_init(), "second time")
+        self.font = pygame.font.Font('freesansbold.ttf', 15) 
+        self.again_text = self.font.render("again", self.gray, self.black)
+        self.again_text_rect = self.again_text.get_rect()
+        # self.again_text_rect.topleft = (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//3)
+
+        self.quit_text = self.font.render("quit", self.gray, self.black)
+        self.quit_text_rect = self.again_text.get_rect()
+        # self.quit_text_rect.topleft = (2*(self.x_lenght//3-self.size_enter),self.y_length+self.menu_size//3)
+
+
+
     
     def show(self):
         while self.run:
@@ -114,36 +132,68 @@ class View:
             for event in pygame.event.get():
                 # Exit app if click quit button
                 if event.type == pygame.QUIT:
-                    self.run = False                    
+                    self.run = False      
+                    return False  
 
+
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if event.button == 1:  # Check for left mouse button click
+                        mouse_x, mouse_y = pygame.mouse.get_pos()  
+                        if green_rect.collidepoint(mouse_x, mouse_y):
+                            print("clicked on green") 
+                            self.run = False
+                            return True     
+
+                        if red_rect.collidepoint(mouse_x, mouse_y):
+                            print("clicked on red")   
+                            self.run = False
+                            return False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                    self.run = False   
+                    return True       
+
+            
             self.screen.fill((255,255,255))
             
             for cell in self.world.alive_cells:
                 pygame.draw.rect(self.screen, self.blue, (cell.x * self.size_cell, cell.y * self.size_cell, self.size_cell, self.size_cell))
             pygame.draw.rect(self.screen, self.gray, (0,self.y_length,self.x_lenght, self.menu_size))
-            pygame.draw.rect(self.screen, self.green, (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
-            pygame.draw.rect(self.screen, self.red, (2*(self.x_lenght//3)-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
+            green_rect =pygame.draw.rect(self.screen, self.green, (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
+            red_rect = pygame.draw.rect(self.screen, self.red, (2*(self.x_lenght//3)-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
+            
+            self.again_text_rect.center = (green_rect.center)
+            self.quit_text_rect.center = (red_rect.center)
+
+            self.screen.blit(self.again_text, self.again_text_rect)
+            self.screen.blit(self.quit_text, self.quit_text_rect)
             pygame.display.flip()
 
             self.world.update()
         pygame.quit()
 
 class Get_coords():
-    def __init__(self, x_len, y_len, cell_size, menu_height):
+    def __init__(self, x_len, y_len, cell_size, menu_height, blue, black, gray, green):
+        #pygame.font.init
         #pygame.init()
         self.x_len = x_len
         self.y_len = y_len
         self.cell_size = cell_size
-        self.blue = (0,0,255)
-        self.black = (15,15,15)
-        self.gray = (200,200,200)
-        self.green = (0,128,0)
+        self.blue = blue
+        self.black = black
+        self.gray = gray
+        self.green = green
         self.run = True
         self.show_positions  = []
         self.positions = []
         self.menu_height = menu_height
         self.screen = pygame.display.set_mode((self.x_len, self.y_len+self.menu_height))
         self.size_enter = 30
+        pygame.font.init()
+        print( pygame.font.get_init(), "first time")
+        self.font = pygame.font.Font('freesansbold.ttf', 15) 
+        self.enter_cords_text = self.font.render("enter Coodinates", self.gray, self.black)
+        self.enter_cords_text_rect = self.enter_cords_text.get_rect()
+        #self.enter_cords_text_rect.topleft = (self.x_len//2-self.size_enter,self.y_len+self.menu_height//4)
 
     def get_start_positions(self):
         while self.run:
@@ -154,7 +204,6 @@ class Get_coords():
                 if event.type == pygame.QUIT:
                     self.run = False
 
-                    
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Check for left mouse button click
                         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -169,6 +218,10 @@ class Get_coords():
                             self.show_positions.pop(self.show_positions.index([x_corner, y_corner]))
                             self.positions.pop(self.positions.index([x_corner/self.cell_size,y_corner/self.cell_size]))
                             #print(self.show_positions)
+
+                        if enter_rect.collidepoint(mouse_x, mouse_y): 
+                            self.run = False
+                            
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
                     self.run = False
             
@@ -179,7 +232,9 @@ class Get_coords():
             for pos in self.show_positions:
                 pygame.draw.rect(self.screen, self.blue, (pos[0],pos[1],self.cell_size, self.cell_size))
             pygame.draw.rect(self.screen, self.gray, (0,self.y_len,self.x_len, self.menu_height))
-            pygame.draw.rect(self.screen, self.green, (self.x_len//2-self.size_enter,self.y_len+self.menu_height//4,2*self.size_enter, self.size_enter))
+            enter_rect =pygame.draw.rect(self.screen, self.green, (self.x_len//2-self.size_enter * 2.5,self.y_len+self.menu_height//4,5*self.size_enter, self.size_enter))
+            self.enter_cords_text_rect.center = enter_rect.center
+            self.screen.blit(self.enter_cords_text, self.enter_cords_text_rect)
             pygame.display.flip()
         pygame.quit()
 
@@ -189,9 +244,14 @@ class Get_coords():
 MENU_HEIGHT = 100
 X_VISUAL_SIZE = 400
 Y_VISUAL_SIZE = 450
-NUMBER_OF_GENERATIONS = 8
-TIME_FOR_NEW_GEN = 3
-CELL_SIZE = 30
+# NUMBER_OF_GENERATIONS = 8
+# TIME_FOR_NEW_GEN = 3
+CELL_SIZE = 15
+BLUE = (0,0,255)
+BLACK = (15,15,15)
+GRAY= (200,200,200)
+GREEN = (0,128,0)
+RED = (168,0,0)
 
 
 starting_poitions = [[-1,-1], [0,-1], [-1,0]]
@@ -200,12 +260,17 @@ glider = [[1,0], [2,0], [0,1], [1,1],[1,2]]
 switcher = [[4,0], [4,1],[4,2], [4,6],[4,7], [4,8], [0,4], [1,4], [2,4], [6,4], [7,4], [8,4]]
 star = [[4,3], [4,4], [4,5], [3,4], [5,4]]
 
-if __name__ == "__main__":
-    get_coords = Get_coords(X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT)
-    coords = get_coords.get_start_positions()
-    print(coords, "hello")
+run = True
 
-    world = World(start_num_alive=6, random_x_range=X_VISUAL_SIZE, random_y_range=Y_VISUAL_SIZE, start_pos=coords)
-    world.create_starting_cells()
-    mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT)
-    mapp.show()
+if __name__ == "__main__":
+
+    while run:
+
+        get_coords = Get_coords(X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT, BLUE, BLACK, GRAY, GREEN)
+        coords = get_coords.get_start_positions()
+
+        world = World(start_num_alive=6, random_x_range=X_VISUAL_SIZE, random_y_range=Y_VISUAL_SIZE, start_pos=coords)
+        world.create_starting_cells()
+        mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,BLUE, BLACK, GRAY, GREEN, RED)
+        continu = mapp.show()
+        run = continu
