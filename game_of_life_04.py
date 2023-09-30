@@ -2,11 +2,6 @@ import random
 import numpy as np
 import time
 import pygame
-# pygame.init()
-pygame.font.init()
-
-
-
 
 class World:
     def __init__(self, start_num_alive, random_x_range, random_y_range, start_pos):
@@ -97,7 +92,7 @@ class Cell:
         self.num_alive_neighbours = 0
 
 class View:
-    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size, blue, black, gray, green, red):
+    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size,time_delay, blue, black, gray, green, red):
         self.world = world
         self.x_lenght = visual_x_size
         self.y_length = visual_y_size
@@ -110,74 +105,61 @@ class View:
         self.menu_size = menu_size
         self.screen = pygame.display.set_mode((self.x_lenght, self.y_length +self.menu_size))
         self.run = True
-        self.time_delay = 80
+        self.time_delay = time_delay
         self.size_enter = 30
         pygame.font.init()
-        print( pygame.font.get_init(), "second time")
         self.font = pygame.font.Font('freesansbold.ttf', 15) 
         self.again_text = self.font.render("again", self.gray, self.black)
         self.again_text_rect = self.again_text.get_rect()
-        # self.again_text_rect.topleft = (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//3)
-
         self.quit_text = self.font.render("quit", self.gray, self.black)
         self.quit_text_rect = self.again_text.get_rect()
-        # self.quit_text_rect.topleft = (2*(self.x_lenght//3-self.size_enter),self.y_length+self.menu_size//3)
-
-
-
     
     def show(self):
         while self.run:
             pygame.time.delay(self.time_delay)
             for event in pygame.event.get():
-                # Exit app if click quit button
                 if event.type == pygame.QUIT:
                     self.run = False      
                     return False  
-
-
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Check for left mouse button click
                         mouse_x, mouse_y = pygame.mouse.get_pos()  
-                        if green_rect.collidepoint(mouse_x, mouse_y):
-                            print("clicked on green") 
+                        if green_rect.collidepoint(mouse_x, mouse_y): # if clicked on green rect, returns True so while loop isn't broken
                             self.run = False
                             return True     
-
-                        if red_rect.collidepoint(mouse_x, mouse_y):
-                            print("clicked on red")   
+                        if red_rect.collidepoint(mouse_x, mouse_y):  # if clicked on red rect, returns False so while loop is broken and everything stopps
                             self.run = False
                             return False
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN: # if enter is pressed, returns True so while loop isn't broken
                     self.run = False   
                     return True       
-
             
             self.screen.fill((255,255,255))
             
-            for cell in self.world.alive_cells:
+            for cell in self.world.alive_cells: # draw all alive cells
                 pygame.draw.rect(self.screen, self.blue, (cell.x * self.size_cell, cell.y * self.size_cell, self.size_cell, self.size_cell))
-            pygame.draw.rect(self.screen, self.gray, (0,self.y_length,self.x_lenght, self.menu_size))
-            green_rect =pygame.draw.rect(self.screen, self.green, (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
-            red_rect = pygame.draw.rect(self.screen, self.red, (2*(self.x_lenght//3)-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))
+
+            pygame.draw.rect(self.screen, self.gray, (0,self.y_length,self.x_lenght, self.menu_size)) # is menu bellow game 
+            green_rect =pygame.draw.rect(self.screen, self.green, (self.x_lenght//3-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter)) #button
+            red_rect = pygame.draw.rect(self.screen, self.red, (2*(self.x_lenght//3)-self.size_enter,self.y_length+self.menu_size//4,2*self.size_enter, self.size_enter))#button
             
             self.again_text_rect.center = (green_rect.center)
             self.quit_text_rect.center = (red_rect.center)
 
-            self.screen.blit(self.again_text, self.again_text_rect)
-            self.screen.blit(self.quit_text, self.quit_text_rect)
+            self.screen.blit(self.again_text, self.again_text_rect) # text --> again--> to reenter coords
+            self.screen.blit(self.quit_text, self.quit_text_rect) #text --> quit --> to quit the whole game
             pygame.display.flip()
-
             self.world.update()
         pygame.quit()
 
-class Get_coords():
-    def __init__(self, x_len, y_len, cell_size, menu_height, blue, black, gray, green):
-        #pygame.font.init
-        #pygame.init()
+class GetCoords(): # this class allows you to choose your alive cells 
+    def __init__(self, x_len, y_len, cell_size, menu_height, list_of_patterns,blue, black, gray, green):
         self.x_len = x_len
         self.y_len = y_len
         self.cell_size = cell_size
+        self.pattern_list = list_of_patterns
+        self.pos_pattern = 0
+        self.patterns_last_object = False
         self.blue = blue
         self.black = black
         self.gray = gray
@@ -189,11 +171,9 @@ class Get_coords():
         self.screen = pygame.display.set_mode((self.x_len, self.y_len+self.menu_height))
         self.size_enter = 30
         pygame.font.init()
-        print( pygame.font.get_init(), "first time")
         self.font = pygame.font.Font('freesansbold.ttf', 15) 
         self.enter_cords_text = self.font.render("enter Coodinates", self.gray, self.black)
         self.enter_cords_text_rect = self.enter_cords_text.get_rect()
-        #self.enter_cords_text_rect.topleft = (self.x_len//2-self.size_enter,self.y_len+self.menu_height//4)
 
     def get_start_positions(self):
         while self.run:
@@ -203,49 +183,62 @@ class Get_coords():
                 # Exit app if click quit button
                 if event.type == pygame.QUIT:
                     self.run = False
+                    return self.positions
 
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if event.button == 1:  # Check for left mouse button click
-                        mouse_x, mouse_y = pygame.mouse.get_pos()
-                        #print(f"Mouse Clicked at Position: ({mouse_x}, {mouse_y})")
+                        mouse_x, mouse_y = pygame.mouse.get_pos()                       
                         x_corner =(mouse_x//self.cell_size)*self.cell_size
                         y_corner = (mouse_y//self.cell_size)*self.cell_size
-                        if [x_corner,y_corner] not in self.show_positions:
+                        if [x_corner,y_corner] not in self.show_positions: # add the coordintaes of mouse if they arent in the list already
                             self.show_positions.append([x_corner, y_corner])
                             self.positions.append([x_corner/self.cell_size,y_corner/self.cell_size])
-                            #print(self.show_positions)
-                        elif [x_corner,y_corner] in self.show_positions:
+                            
+                        elif [x_corner,y_corner] in self.show_positions: # if the coordinates are already in the list the are removed
                             self.show_positions.pop(self.show_positions.index([x_corner, y_corner]))
                             self.positions.pop(self.positions.index([x_corner/self.cell_size,y_corner/self.cell_size]))
-                            #print(self.show_positions)
-
-                        if enter_rect.collidepoint(mouse_x, mouse_y): 
-                            self.run = False
                             
-                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN:
+                        if enter_rect.collidepoint(mouse_x, mouse_y): #if green rect is clicked on --> loop stops and coords are returned
+                            self.run = False
+                            return self.positions
+
+                        if pattern_rect.collidepoint(mouse_x, mouse_y):
+                            if self.pos_pattern-1 >=0 or self.patterns_last_object == True: # is to delete the pattern again if green square is pressed again
+                                for i in self.pattern_list[self.pos_pattern-1]:
+                                    self.show_positions.pop(self.show_positions.index([i[0]*self.cell_size, i[1]*self.cell_size]))
+                                    self.positions.pop(self.positions.index(i))
+                            for i in (self.pattern_list[self.pos_pattern]): # is to add the next patern when green square is pressed again
+                                self.show_positions.append([i[0]*self.cell_size, i[1]*self.cell_size])
+                                self.positions.append(i)
+                            if self.pos_pattern == len(self.pattern_list)-1: # to go to next pattern in the list
+                                self.pos_pattern = 0 
+                                self.patterns_last_object = True
+                            else:
+                                self.pos_pattern += 1
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_RETURN: # instead of clicking the green button, can alos just press enter
                     self.run = False
+                    return self.positions
             
             for i in range(self.x_len//self.cell_size):
-                pygame.draw.rect(self.screen, self.black, (i * self.cell_size, 0, 1, self.y_len))
+                pygame.draw.rect(self.screen, self.black, (i * self.cell_size, 0, 1, self.y_len)) #draws vertical lines
             for i in range(self.y_len//self.cell_size + 1):
-                pygame.draw.rect(self.screen, self.black, (0, i * self.cell_size, self.x_len,1 ))
+                pygame.draw.rect(self.screen, self.black, (0, i * self.cell_size, self.x_len,1 ))#draws hrizontal lines
             for pos in self.show_positions:
-                pygame.draw.rect(self.screen, self.blue, (pos[0],pos[1],self.cell_size, self.cell_size))
-            pygame.draw.rect(self.screen, self.gray, (0,self.y_len,self.x_len, self.menu_height))
-            enter_rect =pygame.draw.rect(self.screen, self.green, (self.x_len//2-self.size_enter * 2.5,self.y_len+self.menu_height//4,5*self.size_enter, self.size_enter))
+                pygame.draw.rect(self.screen, self.blue, (pos[0],pos[1],self.cell_size, self.cell_size))# drwas the cells
+            pygame.draw.rect(self.screen, self.gray, (0,self.y_len,self.x_len, self.menu_height)) 
+            enter_rect =pygame.draw.rect(self.screen, self.green, (self.x_len//2-self.size_enter * 2.5,self.y_len+self.menu_height//4,5*self.size_enter, self.size_enter))# green box to enter the values of alive cells
             self.enter_cords_text_rect.center = enter_rect.center
             self.screen.blit(self.enter_cords_text, self.enter_cords_text_rect)
+            pattern_rect =pygame.draw.rect(self.screen, self.green, (self.x_len//5,self.y_len+self.menu_height//4,2*self.cell_size, 2*self.cell_size))# green box to iterate through pattern list
+
             pygame.display.flip()
         pygame.quit()
 
-        return self.positions
-
 # visualisation part
 MENU_HEIGHT = 100
-X_VISUAL_SIZE = 400
+X_VISUAL_SIZE = 600
 Y_VISUAL_SIZE = 450
-# NUMBER_OF_GENERATIONS = 8
-# TIME_FOR_NEW_GEN = 3
+TIME_FOR_NEW_GEN = 300
 CELL_SIZE = 15
 BLUE = (0,0,255)
 BLACK = (15,15,15)
@@ -253,24 +246,36 @@ GRAY= (200,200,200)
 GREEN = (0,128,0)
 RED = (168,0,0)
 
+# coordinates of certain patterns which can be chosen 
+nice_pattern = [[11.0, 10.0], [11.0, 9.0], [12.0, 9.0], [13.0, 9.0], [13.0, 10.0], [13.0, 11.0], [11.0, 11.0], [11.0, 14.0], [11.0, 13.0], [13.0, 13.0], [13.0, 14.0], [13.0, 15.0], [12.0, 15.0], [11.0, 15.0], [23.0, 32.0]]
+glider = [[4.0, 2.0], [5.0, 2.0], [6.0, 2.0], [6.0, 1.0], [5.0, 0.0], [14.0, 2.0], [15.0, 3.0], [15.0, 4.0], [14.0, 4.0], [13.0, 4.0], [5.0, 11.0], [6.0, 12.0], [6.0, 13.0], [4.0, 13.0], [5.0, 13.0], [0.0, 19.0], [1.0, 19.0], [1.0, 17.0], [2.0, 19.0], [2.0, 18.0], [13.0, 8.0], [14.0, 9.0], [14.0, 10.0], [13.0, 10.0], [12.0, 10.0], [11.0, 14.0], [12.0, 15.0], [12.0, 16.0], [11.0, 16.0], [10.0, 16.0], [6.0, 20.0], [7.0, 22.0], [6.0, 22.0], [5.0, 22.0], [7.0, 21.0], [23.0, 1.0], [24.0, 2.0], [24.0, 3.0], [23.0, 3.0], [22.0, 3.0], [22.0, 6.0], [23.0, 7.0], [23.0, 8.0], [22.0, 8.0], [21.0, 8.0], [18.0, 32.0]]
+birds = [[1.0, 17.0], [1.0, 15.0], [2.0, 14.0], [4.0, 17.0], [5.0, 16.0], [5.0, 15.0], [5.0, 14.0], [4.0, 14.0], [3.0, 14.0], [8.0, 15.0], [8.0, 17.0], [9.0, 14.0], [10.0, 18.0], [12.0, 17.0], [13.0, 16.0], [13.0, 15.0], [13.0, 14.0], [10.0, 14.0], [11.0, 14.0], [12.0, 14.0], [16.0, 15.0], [17.0, 14.0], [16.0, 17.0], [18.0, 18.0], [19.0, 18.0], [21.0, 17.0], [22.0, 16.0], [22.0, 15.0], [22.0, 14.0], [18.0, 14.0], [19.0, 14.0], [20.0, 14.0], [21.0, 14.0], [13.0, 32.0]]
+block = [[12.0, 10.0], [13.0, 10.0], [14.0, 10.0], [15.0, 10.0], [15.0, 11.0], [14.0, 11.0], [12.0, 11.0], [13.0, 11.0], [12.0, 12.0], [13.0, 12.0], [14.0, 12.0], [15.0, 12.0], [16.0, 10.0], [16.0, 11.0], [16.0, 12.0], [13.0, 13.0], [12.0, 13.0], [14.0, 13.0], [16.0, 13.0], [15.0, 13.0], [16.0, 14.0], [15.0, 14.0], [14.0, 14.0], [13.0, 14.0], [12.0, 14.0], [22.0, 32.0]]
+four_squares = [[13.0, 13.0], [14.0, 12.0], [14.0, 11.0], [14.0, 10.0], [12.0, 13.0], [11.0, 13.0], [13.0, 15.0], [12.0, 15.0], [11.0, 15.0], [14.0, 16.0], [14.0, 17.0], [14.0, 18.0], [16.0, 16.0], [16.0, 18.0], [16.0, 17.0], [18.0, 15.0], [17.0, 15.0], [19.0, 15.0], [16.0, 12.0], [16.0, 11.0], [16.0, 10.0], [17.0, 13.0], [18.0, 13.0], [19.0, 13.0], [13.0, 20.0], [12.0, 20.0], [11.0, 20.0], [9.0, 16.0], [9.0, 18.0], [9.0, 17.0], [17.0, 20.0], [19.0, 20.0], [18.0, 20.0], [21.0, 16.0], [21.0, 17.0], [21.0, 18.0], [9.0, 12.0], [9.0, 10.0], [9.0, 11.0], [11.0, 8.0], [12.0, 8.0], [13.0, 8.0], [17.0, 8.0], [18.0, 8.0], [19.0, 8.0], [21.0, 12.0], [21.0, 11.0], [21.0, 10.0], [16.0, 32.0]]
+space_ship = [[12.0, 8.0], [13.0, 7.0], [13.0, 8.0], [14.0, 7.0], [12.0, 10.0], [13.0, 10.0], [13.0, 11.0], [14.0, 11.0], [15.0, 8.0], [15.0, 9.0], [15.0, 10.0], [16.0, 9.0], [20.0, 32.0]]
+static = [[3.0, 4.0], [4.0, 4.0], [4.0, 3.0], [3.0, 3.0], [7.0, 9.0], [6.0, 10.0], [6.0, 11.0], [7.0, 12.0], [8.0, 11.0], [8.0, 10.0], [15.0, 5.0], [16.0, 6.0], [17.0, 4.0], [16.0, 4.0], [17.0, 5.0], [15.0, 21.0], [15.0, 23.0], [14.0, 22.0], [16.0, 22.0], [25.0, 18.0], [26.0, 19.0], [26.0, 17.0], [27.0, 16.0], [28.0, 17.0], [27.0, 18.0], [29.0, 7.0], [29.0, 6.0], [30.0, 6.0], [31.0, 7.0], [31.0, 8.0], [31.0, 9.0], [32.0, 9.0], [15.0, 14.0], [16.0, 13.0], [17.0, 12.0], [16.0, 15.0], [17.0, 15.0], [18.0, 13.0], [18.0, 14.0], [17.0, 32.0]]
+crosses = [[4.0, 2.0], [4.0, 4.0], [3.0, 3.0], [5.0, 3.0], [4.0, 3.0], [14.0, 2.0], [14.0, 3.0], [14.0, 4.0], [13.0, 3.0], [15.0, 3.0], [23.0, 3.0], [24.0, 2.0], [24.0, 3.0], [24.0, 4.0], [25.0, 3.0], [33.0, 3.0], [34.0, 3.0], [34.0, 2.0], [35.0, 3.0], [34.0, 4.0], [9.0, 9.0], [9.0, 10.0], [9.0, 11.0], [8.0, 10.0], [10.0, 10.0], [20.0, 11.0], [20.0, 10.0], [20.0, 9.0], [19.0, 10.0], [21.0, 10.0], [29.0, 9.0], [29.0, 10.0], [28.0, 10.0], [29.0, 11.0], [30.0, 10.0], [4.0, 16.0], [4.0, 17.0], [4.0, 18.0], [3.0, 17.0], [5.0, 17.0], [14.0, 16.0], [14.0, 18.0], [15.0, 17.0], [14.0, 17.0], [13.0, 17.0], [24.0, 16.0], [24.0, 17.0], [23.0, 17.0], [24.0, 18.0], [25.0, 17.0], [34.0, 16.0], [34.0, 18.0], [35.0, 17.0], [34.0, 17.0], [33.0, 17.0], [9.0, 23.0], [9.0, 24.0], [9.0, 25.0], [8.0, 24.0], [10.0, 24.0], [20.0, 23.0], [20.0, 24.0], [20.0, 25.0], [21.0, 24.0], [19.0, 24.0], [29.0, 23.0], [29.0, 24.0], [29.0, 25.0], [28.0, 24.0], [30.0, 24.0], [22.0, 32.0]]
+oszillating =[[2.0, 3.0], [4.0, 3.0], [3.0, 3.0], [8.0, 12.0], [9.0, 11.0], [9.0, 10.0], [10.0, 12.0], [10.0, 13.0], [11.0, 11.0], [16.0, 5.0], [16.0, 4.0], [16.0, 3.0], [17.0, 4.0], [17.0, 5.0], [17.0, 6.0], [3.0, 21.0], [3.0, 20.0], [4.0, 20.0], [4.0, 21.0], [6.0, 23.0], [5.0, 23.0], [6.0, 22.0], [5.0, 22.0], [26.0, 2.0], [27.0, 2.0], [28.0, 2.0], [28.0, 3.0], [28.0, 4.0], [26.0, 3.0], [26.0, 4.0], [27.0, 4.0], [29.0, 2.0], [29.0, 3.0], [29.0, 4.0], [30.0, 4.0], [31.0, 4.0], [32.0, 4.0], [32.0, 3.0], [32.0, 2.0], [30.0, 2.0], [31.0, 2.0], [30.0, 3.0], [27.0, 21.0], [27.0, 22.0], [27.0, 23.0], [28.0, 24.0], [29.0, 24.0], [30.0, 24.0], [31.0, 24.0], [28.0, 21.0], [28.0, 22.0], [27.0, 20.0], [29.0, 23.0], [30.0, 23.0], [28.0, 19.0], [29.0, 19.0], [30.0, 19.0], [30.0, 20.0], [29.0, 20.0], [31.0, 19.0], [32.0, 20.0], [31.0, 21.0], [32.0, 21.0], [31.0, 22.0], [32.0, 22.0], [32.0, 23.0], [22.0, 32.0], [12.0, 20.0], [12.0, 21.0], [13.0, 21.0], [13.0, 22.0], [13.0, 23.0], [15.0, 21.0], [15.0, 22.0], [15.0, 23.0], [16.0, 21.0], [16.0, 20.0], [12.0, 24.0], [12.0, 25.0], [11.0, 24.0], [11.0, 23.0], [16.0, 24.0], [16.0, 25.0], [17.0, 24.0], [17.0, 23.0], [18.0, 11.0], [18.0, 12.0], [19.0, 11.0], [20.0, 12.0], [20.0, 14.0], [21.0, 15.0], [22.0, 15.0], [22.0, 14.0], [17.0, 32.0]]
 
-starting_poitions = [[-1,-1], [0,-1], [-1,0]]
-nice_pattern = [[10,10],[11,10],[12,10], [10,11],[10,12],[12,11], [12,12], [10,14], [10,15], [10,16], [11,16], [12,16],[12,15], [12,14]]
-glider = [[1,0], [2,0], [0,1], [1,1],[1,2]]
-switcher = [[4,0], [4,1],[4,2], [4,6],[4,7], [4,8], [0,4], [1,4], [2,4], [6,4], [7,4], [8,4]]
-star = [[4,3], [4,4], [4,5], [3,4], [5,4]]
+pattern_list = []
+pattern_list.extend([nice_pattern])
+pattern_list.extend([static])
+pattern_list.extend([crosses])
+pattern_list.extend([oszillating])
+pattern_list.extend([birds])
+pattern_list.extend([block])
+pattern_list.extend([four_squares])
+pattern_list.extend([space_ship])
+pattern_list.extend([glider])
 
 run = True
-
 if __name__ == "__main__":
-
     while run:
-
-        get_coords = Get_coords(X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT, BLUE, BLACK, GRAY, GREEN)
+        get_coords = GetCoords(X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,pattern_list, BLUE, BLACK, GRAY, GREEN)
         coords = get_coords.get_start_positions()
-
+        #print(coords)
         world = World(start_num_alive=6, random_x_range=X_VISUAL_SIZE, random_y_range=Y_VISUAL_SIZE, start_pos=coords)
         world.create_starting_cells()
-        mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,BLUE, BLACK, GRAY, GREEN, RED)
+        mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,TIME_FOR_NEW_GEN,BLUE, BLACK, GRAY, GREEN, RED)
         continu = mapp.show()
         run = continu
