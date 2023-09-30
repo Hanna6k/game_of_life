@@ -2,13 +2,14 @@ import random
 import numpy as np
 import time
 
+
 class World:
-    def __init__(self, start_num_alive, visual_x_size, visual_y_size):
+    def __init__(self, start_num_alive, random_x_range, random_y_range):
         self.alive_cells = []
         self.num_start_alive = 6
         self.start_num_alive = start_num_alive
-        self.visual_x_size = visual_x_size
-        self.visual_y_size = visual_y_size
+        self.visual_x_size = random_x_range
+        self.visual_y_size = random_y_range
         self.all_dead_neighbours = []
 
     def create_starting_cells(self, starting_pos):   
@@ -91,6 +92,12 @@ class Cell:
         self.y = y  
         self.num_alive_neighbours = 0
 
+
+
+class View:
+    def __init__(self):
+        pass
+
 # visualisation part
 X_VISUAL_SIZE = 9
 Y_VISUAL_SIZE = 9
@@ -103,7 +110,7 @@ glider = [[1,0], [2,0], [0,1], [1,1],[1,2]]
 switcher = [[4,0], [4,1],[4,2], [4,6],[4,7], [4,8], [0,4], [1,4], [2,4], [6,4], [7,4], [8,4]]
 star = [[4,3], [4,4], [4,5], [3,4], [5,4]]
 
-world = World(start_num_alive=6, visual_x_size=X_VISUAL_SIZE, visual_y_size=Y_VISUAL_SIZE)
+world = World(start_num_alive=6, random_x_range=X_VISUAL_SIZE, random_y_range=Y_VISUAL_SIZE)
 position_of_first_cells = world.create_starting_cells(glider)
 
 mapp = np.empty((Y_VISUAL_SIZE + 1, X_VISUAL_SIZE + 1), dtype=str) 
