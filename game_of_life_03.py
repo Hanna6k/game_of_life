@@ -101,6 +101,7 @@ class View:
         self.green = green
         self.red = red
         self.black = black
+        self.white = (255,255,255)
         self.size_cell = cell_size
         self.menu_size = menu_size
         self.screen = pygame.display.set_mode((self.x_lenght, self.y_length +self.menu_size))
@@ -145,6 +146,11 @@ class View:
             
             self.again_text_rect.center = (green_rect.center)
             self.quit_text_rect.center = (red_rect.center)
+
+            for i in range(self.x_lenght//self.size_cell):
+                pygame.draw.rect(self.screen, self.white, (i * self.size_cell, 0, 1, self.y_length)) #draws vertical lines
+            for i in range(self.y_length//self.size_cell + 1):
+                pygame.draw.rect(self.screen, self.white, (0, i * self.size_cell, self.x_lenght,1 ))#draws hrizontal lines
 
             self.screen.blit(self.again_text, self.again_text_rect) # text --> again--> to reenter coords
             self.screen.blit(self.quit_text, self.quit_text_rect) #text --> quit --> to quit the whole game
@@ -238,7 +244,7 @@ class GetCoords(): # this class allows you to choose your alive cells
 MENU_HEIGHT = 100
 X_VISUAL_SIZE = 600
 Y_VISUAL_SIZE = 450
-TIME_FOR_NEW_GEN = 300
+TIME_FOR_NEW_GEN =150 
 CELL_SIZE = 15
 BLUE = (0,0,255)
 BLACK = (15,15,15)
