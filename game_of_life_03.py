@@ -92,7 +92,7 @@ class Cell:
         self.num_alive_neighbours = 0
 
 class View:
-    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size,time_delay, blue, black, gray, green, red):
+    def __init__(self, world, visual_x_size, visual_y_size, cell_size, menu_size,time_delay, blue, black, gray, green, red, white):
         self.world = world
         self.x_lenght = visual_x_size
         self.y_length = visual_y_size
@@ -101,7 +101,7 @@ class View:
         self.green = green
         self.red = red
         self.black = black
-        self.white = (255,255,255)
+        self.white = white
         self.size_cell = cell_size
         self.menu_size = menu_size
         self.screen = pygame.display.set_mode((self.x_lenght, self.y_length +self.menu_size))
@@ -251,6 +251,7 @@ BLACK = (15,15,15)
 GRAY= (200,200,200)
 GREEN = (0,128,0)
 RED = (168,0,0)
+WHITE = (255,255,255)
 
 # coordinates of certain patterns which can be chosen 
 nice_pattern = [[11.0, 10.0], [11.0, 9.0], [12.0, 9.0], [13.0, 9.0], [13.0, 10.0], [13.0, 11.0], [11.0, 11.0], [11.0, 14.0], [11.0, 13.0], [13.0, 13.0], [13.0, 14.0], [13.0, 15.0], [12.0, 15.0], [11.0, 15.0], [23.0, 32.0]]
@@ -282,6 +283,6 @@ if __name__ == "__main__":
         #print(coords)
         world = World(start_num_alive=6, random_x_range=X_VISUAL_SIZE, random_y_range=Y_VISUAL_SIZE, start_pos=coords)
         world.create_starting_cells()
-        mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,TIME_FOR_NEW_GEN,BLUE, BLACK, GRAY, GREEN, RED)
+        mapp = View(world, X_VISUAL_SIZE, Y_VISUAL_SIZE, CELL_SIZE, MENU_HEIGHT,TIME_FOR_NEW_GEN,BLUE, BLACK, GRAY, GREEN, RED, WHITE)
         continu = mapp.show()
         run = continu
